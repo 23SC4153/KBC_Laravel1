@@ -25,8 +25,15 @@ Route::middleware(['login.session'])->group(function() {
 
     // Student Management - Full CRUD
     Route::resource('/Student', StudentController::class);
+    Route::get('/Student/{id}/enroll-subjects', [StudentController::class, 'enrollSubjectsForm'])->name('Student.enrollSubjectsForm');
+    Route::post('/Student/{id}/enroll-subjects', [StudentController::class, 'enrollSubjects'])->name('Student.enrollSubjects');
+    // Enrollment admin page
+    Route::get('/Enrollment', [App\Http\Controllers\EnrollmentController::class, 'index'])->name('Enrollment.index');
+    Route::post('/Enrollment/enroll', [App\Http\Controllers\EnrollmentController::class, 'enroll'])->name('Enrollment.enroll');
     Route::get('/Student/{id}/changePassword', [StudentController::class, 'changePasswordForm'])->name('Student.changePasswordForm');
     Route::put('/Student/{id}/changePassword', [StudentController::class, 'changePassword'])->name('Student.changePassword');
+    Route::post('/Student/{id}/subjects', [StudentController::class, 'enrollSubject'])->name('Student.enrollSubject');
+    Route::delete('/Student/{id}/subjects/{subjectId}', [StudentController::class, 'unenrollSubject'])->name('Student.unenrollSubject');
 
     // Teacher Management - Full CRUD
     Route::resource('/Teacher', TeacherController::class);

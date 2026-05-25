@@ -28,8 +28,8 @@ class SampleDataSeeder extends Seeder
             ]);
         }
 
-        // Create 10 subjects (attach to degrees round-robin)
-        for ($i = 1; $i <= 10; $i++) {
+        // Create 20 subjects (two subjects per degree)
+        for ($i = 1; $i <= 20; $i++) {
             Subject::create([
                 'SubjectName' => 'Subject ' . $i,
                 'SubjectCode' => 'SUB' . str_pad($i, 2, '0', STR_PAD_LEFT),
@@ -51,9 +51,11 @@ class SampleDataSeeder extends Seeder
             ]);
         }
 
-        // Create 10 students
+        $subjectsByDegree = Subject::all()->groupBy('degree_id');
+
+        // Create 10 students and enroll each one in a few subjects from their degree
         for ($i = 1; $i <= 10; $i++) {
-            StudentModel::create([
+            $student = StudentModel::create([
                 'fname' => $faker->firstName(),
                 'mname' => $faker->optional()->firstName(),
                 'lname' => $faker->lastName(),
@@ -62,6 +64,14 @@ class SampleDataSeeder extends Seeder
                 'degree_id' => $degrees[($i - 1) % count($degrees)]->id,
                 'user_account_id' => null,
             ]);
+
+            $degreeSubjects = $subjectsByDegree->get($student->degree_id, collect());
+
+            if ($degreeSubjects->isNotEmpty()) {
+                $student->subjects()->attach(
+                    $degreeSubjects->take(min(2, $degreeSubjects->count()))->pluck('id')->all()
+                );
+            }
         }
     }
 }

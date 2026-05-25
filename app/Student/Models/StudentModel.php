@@ -7,6 +7,7 @@ use App\Models\DegreeModel;
 use App\Models\UserAccount;
 use App\Models\Course;
 use App\Models\CourseStudent;
+use App\Models\Subject;
 
 class StudentModel extends Model
 {
@@ -55,6 +56,15 @@ class StudentModel extends Model
     {
         return $this->belongsToMany(Course::class, 'course_student_model', 'student_id', 'course_id')
             ->using(CourseStudent::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * The subjects that belong to the student.
+     */
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'subject_student_model', 'student_id', 'subject_id')
             ->withTimestamps();
     }
 

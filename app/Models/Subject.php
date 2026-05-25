@@ -19,4 +19,10 @@ class Subject extends Model
     {
         return $this->belongsTo(DegreeModel::class, 'degree_id');
     }
+
+    public function students()
+    {
+        return $this->belongsToMany(StudentModel::class, 'subject_student_model', 'subject_id', 'student_id')
+            ->withTimestamps();
+    }
 }

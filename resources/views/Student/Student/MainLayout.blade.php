@@ -854,6 +854,8 @@
                     <i class="fas fa-user-graduate fa-fw"></i> Students
                 </a></li>
 
+                {{-- Enrollment is available per-student in the Students list. --}}
+
                 <li role="none"><a href="{{ route('Subject.index') }}"
                     class="{{ request()->routeIs('Subject.*') ? 'active' : '' }}"
                     role="menuitem">
@@ -864,6 +866,12 @@
                     class="{{ request()->routeIs('Degree.*') ? 'active' : '' }}"
                     role="menuitem">
                     <i class="fas fa-graduation-cap fa-fw"></i> Degrees
+                </a></li>
+
+                <li role="none"><a href="{{ route('Enrollment.index') }}"
+                    class="{{ request()->routeIs('Enrollment.*') ? 'active' : '' }}"
+                    role="menuitem">
+                    <i class="fas fa-list fa-fw"></i> Enrollment
                 </a></li>
 
                 <li role="none"><a href="{{ route('Teacher.index') }}"

@@ -43,7 +43,7 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Degree *</label>
-                <select name="degree_id" class="form-control @error('degree_id') is-invalid @enderror" required>
+                <select name="degree_id" id="student-degree-select" data-student-degree-select class="form-control @error('degree_id') is-invalid @enderror" required>
                     <option value="">Select Degree</option>
                     @foreach($degrees as $degree)
                         <option value="{{ $degree->id }}" {{ old('degree_id') == $degree->id ? 'selected' : '' }}>{{ $degree->DegreeCode }}</option>
@@ -51,6 +51,27 @@
                 </select>
                 @error('degree_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
             </div>
+            @if(isset($subjects) && $subjects->count())
+                @php
+                    $selectedSubjectIds = old('subject_ids', []);
+                    if (!is_array($selectedSubjectIds)) {
+                        $selectedSubjectIds = [$selectedSubjectIds];
+                    }
+                @endphp
+                <div class="mb-3">
+                    <label class="form-label">Subjects (select multiple)</label>
+                    <select name="subject_ids[]" id="student-subject-select" data-student-subject-select class="form-control @error('subject_ids') is-invalid @enderror @error('subject_ids.*') is-invalid @enderror" multiple size="8" data-empty-message="Select a degree first to load subjects.">
+                        @foreach($subjects as $subject)
+                            <option value="{{ $subject->id }}" data-degree-id="{{ $subject->degree_id }}" {{ in_array($subject->id, $selectedSubjectIds) ? 'selected' : '' }}>
+                                {{ optional($subject->degree)->DegreeCode ?? 'No Degree' }} - {{ $subject->SubjectCode }} - {{ $subject->SubjectName }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted d-block mt-1">Hold Ctrl on Windows to select more than one subject.</small>
+                    @error('subject_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                    @error('subject_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                </div>
+            @endif
             <div class="mb-3">
                 <label class="form-label">Password *</label>
                 <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>

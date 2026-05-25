@@ -5,7 +5,7 @@ class AjaxModal {
         this.containerSelector = options.containerSelector || '#ajaxModalBody';
         this.modalTitleSelector = options.modalTitleSelector || '#ajaxModalLabel';
         this.syncStorageKey = options.syncStorageKey || 'ajax-modal:last-change';
-        this.syncPollInterval = options.syncPollInterval || 1;
+        this.syncPollInterval = options.syncPollInterval || 1000;
         this.syncTabId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
         this.csrfToken = $('meta[name="csrf-token"]').attr('content');
         this.isRefreshingTable = false;
@@ -160,8 +160,22 @@ class AjaxModal {
                 'Accept': 'application/json,text/html,*/*',
             },
             success: (html) => {
+                // If the server returned a full HTML page (includes nav/layout),
+                // extract the first card/form fragment to avoid placing the entire
+                // page (nav, footer) inside the modal.
+                let content = html;
+                try {
+                    const parsed = $($.parseHTML(html));
+                    const fragment = parsed.find('.card').first();
+                    if (fragment.length) {
+                        content = fragment.prop('outerHTML');
+                    }
+                } catch (e) {
+                    // fallback to raw html
+                }
+
                 $(`#${this.modalId} ${this.modalTitleSelector}`).text(title);
-                $(`#${this.modalId} ${this.containerSelector}`).html(html);
+                $(`#${this.modalId} ${this.containerSelector}`).html(content);
                 new bootstrap.Modal(document.getElementById(this.modalId)).show();
             },
             error: (xhr) => {

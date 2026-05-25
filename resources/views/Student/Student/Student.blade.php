@@ -305,6 +305,9 @@
                                         <button type="button" class="student-action" data-ajax-modal data-url="{{ route('Student.edit', $student->id) }}" data-title="Edit Student">
                                             Edit
                                         </button>
+                                        <a href="{{ route('Student.enrollSubjectsForm', $student->id) }}" class="student-action" data-ajax-modal data-url="{{ route('Student.enrollSubjectsForm', $student->id) }}" data-title="Enroll Subjects">
+                                            Enroll Subjects
+                                        </a>
                                         <button type="button" class="student-action delete" data-ajax-delete data-url="{{ route('Student.destroy', $student->id) }}">
                                             Delete
                                         </button>

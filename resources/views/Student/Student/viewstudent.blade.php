@@ -69,6 +69,61 @@
                 </div>
             </div>
 
+            <div class="col-12">
+                <hr class="mt-4">
+                <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">Subject Enrollments</h5>
+                    <span class="badge bg-secondary">{{ $student->subjects->count() }} enrolled</span>
+                </div>
+
+                @if($student->subjects->count())
+                    <div class="row g-3 mb-3">
+                        @foreach($student->subjects as $subject)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="border rounded-3 p-3 h-100" style="background: rgba(13,110,253,0.03); border-color: rgba(13,110,253,0.14) !important;">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                        <div>
+                                            <div class="fw-semibold">{{ $subject->SubjectCode }}</div>
+                                            <div class="small text-muted">{{ $subject->SubjectName }}</div>
+                                        </div>
+                                        <form action="{{ route('Student.unenrollSubject', [$student->id, $subject->id]) }}" method="POST" onsubmit="return confirm('Remove this subject from the student?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                        </form>
+                                    </div>
+                                    <div class="small text-muted">{{ $subject->Description ?: 'No description provided.' }}</div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="alert alert-info mb-3">This student is not enrolled in any subjects yet.</div>
+                @endif
+
+                @if($availableSubjects->count())
+                    <div class="border rounded-3 p-3" style="background: rgba(40,167,69,0.03); border-color: rgba(40,167,69,0.16) !important;">
+                        <form action="{{ route('Student.enrollSubject', $student->id) }}" method="POST" class="row g-3 align-items-end">
+                            @csrf
+                            <div class="col-md-8">
+                                <label for="subject_id" class="form-label mb-1">Enroll in another subject</label>
+                                <select name="subject_id" id="subject_id" class="form-select" required>
+                                    <option value="">Choose a subject</option>
+                                    @foreach($availableSubjects as $subject)
+                                        <option value="{{ $subject->id }}">{{ $subject->SubjectCode }} - {{ $subject->SubjectName }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">Enroll Subject</button>
+                            </div>
+                        </form>
+                    </div>
+                @else
+                    <div class="alert alert-warning mb-0">No additional subjects are available for this degree.</div>
+                @endif
+            </div>
+
             @if($student->userAccount)
                 <div class="col-12">
                     <hr class="mt-4">

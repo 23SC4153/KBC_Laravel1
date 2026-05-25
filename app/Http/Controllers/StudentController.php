@@ -2,16 +2,48 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\DegreeModel;
 use App\Models\StudentModel;
+use App\Models\Subject;
 use App\Models\UserAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
+    /**
+     * Show the form for enrolling a student in multiple subjects.
+     */
+    public function enrollSubjectsForm($id)
+    {
+        $student = StudentModel::with(['degree', 'subjects'])->findOrFail($id);
+        // Show all subjects so student can enroll in any available subject
+        $subjects = Subject::orderBy('SubjectCode')->get();
+        return view('Student.Student.enrollsubjects', compact('student', 'subjects'));
+    }
+
+    /**
+     * Handle enrollment of a student in multiple subjects.
+     */
+    public function enrollSubjects(Request $request, $id)
+    {
+        $student = StudentModel::findOrFail($id);
+        $request->validate([
+            'subjects' => ['array'],
+            'subjects.*' => ['exists:subjects,id'],
+        ]);
+        $student->subjects()->sync($request->subjects ?? []);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['message' => 'Subjects updated!']);
+        }
+
+        return redirect()->route('Student.show', $student->id)->with('success', 'Subjects updated!');
+    }
+// Only keep one class definition below
     /**
      * Display a listing of the resource.
      */
@@ -80,7 +112,7 @@ class StudentController extends Controller
 
         Log::info('Student added successfully with UserAccount ID: ' . $userAccount->id);
         
-        if (request()->ajax()) {
+        if (app('request')->ajax()) {
             return response()->json([
                 'message' => 'Student added successfully.',
                 'redirect' => route('Student.index'),
@@ -95,13 +127,20 @@ class StudentController extends Controller
      */
     public function show(string $id)
     {
-        $student = StudentModel::with('degree', 'userAccount')->findOrFail($id);
+        $student = StudentModel::with(['degree', 'userAccount', 'subjects.degree'])->findOrFail($id);
+        $availableSubjects = Subject::query()
+            ->where('degree_id', '=', $student->degree_id)
+            ->orderBy('SubjectCode', 'asc')
+            ->get()
+            ->reject(function ($subject) use ($student) {
+                return $student->subjects->contains('id', $subject->id);
+            });
         
-        if (request()->ajax()) {
-            return view('Student.Student.partials.view', compact('student'));
+        if (app('request')->ajax()) {
+            return view('Student.Student.partials.view', compact('student', 'availableSubjects'));
         }
         
-        return view('Student.Student.viewstudent', compact('student'));
+        return view('Student.Student.viewstudent', compact('student', 'availableSubjects'));
     }
 
     /**
@@ -112,7 +151,7 @@ class StudentController extends Controller
         $student = StudentModel::findOrFail($id);
         $degrees = DegreeModel::orderBy('DegreeCode', 'asc')->get();
         
-        if (request()->ajax()) {
+        if (app('request')->ajax()) {
             return view('Student.Student.partials.form', compact('student', 'degrees'));
         }
         
@@ -186,7 +225,7 @@ class StudentController extends Controller
 
         Log::info('Student updated successfully.');
 
-        if (request()->ajax()) {
+        if (app('request')->ajax()) {
             return response()->json([
                 'message' => 'Student updated successfully.',
                 'redirect' => route('Student.index'),
@@ -206,7 +245,7 @@ class StudentController extends Controller
 
         Log::info('Student deleted successfully.');
 
-        if (request()->ajax()) {
+        if (app('request')->ajax()) {
             return response()->json([
                 'message' => 'Student deleted successfully.',
                 'redirect' => route('Student.index'),
@@ -246,5 +285,38 @@ class StudentController extends Controller
 
         Log::info('Student password updated successfully.');
         return redirect()->route('Student.show', $student->id)->with('success', 'Password changed successfully.');
+    }
+
+    /**
+     * Enroll the student in a subject.
+     */
+    public function enrollSubject(Request $request, string $id)
+    {
+        $student = StudentModel::findOrFail($id);
+
+        $request->validate([
+            'subject_id' => [
+                'required',
+                'integer',
+                Rule::exists('subjects', 'id')->where(function ($query) use ($student) {
+                    $query->where('degree_id', $student->degree_id);
+                }),
+            ],
+        ]);
+
+        $student->subjects()->syncWithoutDetaching([$request->subject_id]);
+
+        return redirect()->route('Student.show', $student->id)->with('success', 'Subject enrolled successfully.');
+    }
+
+    /**
+     * Remove a subject enrollment from the student.
+     */
+    public function unenrollSubject(string $id, string $subjectId)
+    {
+        $student = StudentModel::findOrFail($id);
+        $student->subjects()->detach($subjectId);
+
+        return redirect()->route('Student.show', $student->id)->with('success', 'Subject removed successfully.');
     }
 }

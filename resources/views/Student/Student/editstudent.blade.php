@@ -47,13 +47,35 @@
                 <div class="mb-3">
                     <label class="form-label">Degree *</label>
                     <div class="position-relative">
-                        <select name="degree_id" class="form-control @error('degree_id') is-invalid @enderror" required style="appearance: none; background-image: url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
+                        <select name="degree_id" id="student-degree-select" data-student-degree-select class="form-control @error('degree_id') is-invalid @enderror" required style="appearance: none; background-image: url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
                             @foreach($degrees as $degree)
                                 <option value="{{ $degree->id }}" {{ old('degree_id', $student->degree_id) == $degree->id ? 'selected' : '' }}>{{ $degree->DegreeCode }}</option>
                             @endforeach
                         </select>
                     </div>
                     @error('degree_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+            @endif
+
+            @if(isset($subjects) && $subjects->count())
+                @php
+                    $selectedSubjectIds = old('subject_ids', $student->subjects->pluck('id')->all());
+                    if (!is_array($selectedSubjectIds)) {
+                        $selectedSubjectIds = [$selectedSubjectIds];
+                    }
+                @endphp
+                <div class="mb-3">
+                    <label class="form-label">Subjects (select multiple)</label>
+                    <select name="subject_ids[]" id="student-subject-select" data-student-subject-select data-fixed-degree-id="{{ $student->degree_id }}" class="form-control @error('subject_ids') is-invalid @enderror @error('subject_ids.*') is-invalid @enderror" multiple size="8" data-empty-message="Select a degree first to load subjects.">
+                        @foreach($subjects as $subject)
+                            <option value="{{ $subject->id }}" data-degree-id="{{ $subject->degree_id }}" {{ in_array($subject->id, $selectedSubjectIds) ? 'selected' : '' }}>
+                                {{ optional($subject->degree)->DegreeCode ?? 'No Degree' }} - {{ $subject->SubjectCode }} - {{ $subject->SubjectName }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted d-block mt-1">Hold Ctrl on Windows to select more than one subject.</small>
+                    @error('subject_ids')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                    @error('subject_ids.*')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
             @endif
 
