@@ -9,7 +9,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 
-Route::redirect('/', '/login');
+Route::redirect('/', '/login')->name('home');
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'index'])->name('login.index');
@@ -20,7 +20,7 @@ Route::middleware(['login.session'])->group(function() {
     // Dashboard & Account Management
     Route::get('/dashboard', [LoginController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/change-password', [LoginController::class, 'changePasswordForm'])->name('user.changePasswordForm');
-    Route::put('/change-password', [LoginController::class, 'changePassword'])->name('user.changePassword');
+    Route::put('/change-password', [LoginController::class, 'changePassword'])->name('user.updatePassword');
     Route::post('/logout', [LoginController::class, 'logout'])->name('user.logout');
 
     // Student Management - Full CRUD
@@ -31,14 +31,14 @@ Route::middleware(['login.session'])->group(function() {
     Route::get('/Enrollment', [App\Http\Controllers\EnrollmentController::class, 'index'])->name('Enrollment.index');
     Route::post('/Enrollment/enroll', [App\Http\Controllers\EnrollmentController::class, 'enroll'])->name('Enrollment.enroll');
     Route::get('/Student/{id}/changePassword', [StudentController::class, 'changePasswordForm'])->name('Student.changePasswordForm');
-    Route::put('/Student/{id}/changePassword', [StudentController::class, 'changePassword'])->name('Student.changePassword');
+    Route::put('/Student/{id}/changePassword', [StudentController::class, 'changePassword'])->name('Student.updatePassword');
     Route::post('/Student/{id}/subjects', [StudentController::class, 'enrollSubject'])->name('Student.enrollSubject');
     Route::delete('/Student/{id}/subjects/{subjectId}', [StudentController::class, 'unenrollSubject'])->name('Student.unenrollSubject');
 
     // Teacher Management - Full CRUD
     Route::resource('/Teacher', TeacherController::class);
     Route::get('/Teacher/{id}/changePassword', [TeacherController::class, 'changePasswordForm'])->name('Teacher.changePasswordForm');
-    Route::put('/Teacher/{id}/changePassword', [TeacherController::class, 'changePassword'])->name('Teacher.changePassword');
+    Route::put('/Teacher/{id}/changePassword', [TeacherController::class, 'changePassword'])->name('Teacher.updatePassword');
     Route::get('/teacher-dashboard', [TeacherController::class, 'dashboard'])->name('Teacher.dashboard');
 
     // Degree Management (Courses)
@@ -59,3 +59,6 @@ Route::middleware(['login.session'])->group(function() {
         Route::resource('/user', AdminUserController::class);
     });
 });
+
+require __DIR__.'/settings.php';
+

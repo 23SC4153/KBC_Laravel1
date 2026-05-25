@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <form action="{{ route('Student.changePassword', $student->id) }}" method="POST" novalidate>
+        <form action="{{ route('Student.updatePassword', $student->id) }}" method="POST" novalidate>
             @csrf
             @method('PUT')
 

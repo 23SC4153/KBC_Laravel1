@@ -471,7 +471,7 @@
             </div>
 
             {{-- Password Form --}}
-            <form action="{{ route('user.changePassword') }}" method="POST" id="passwordForm" class="password-form">
+            <form action="{{ route('user.updatePassword') }}" method="POST" id="passwordForm" class="password-form">
                 @csrf
                 @method('PUT')
 

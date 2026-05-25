@@ -19,7 +19,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('Teacher.changePassword', $teacher->id) }}">
+        <form method="POST" action="{{ route('Teacher.updatePassword', $teacher->id) }}">
             @csrf
             @method('PUT')
             
