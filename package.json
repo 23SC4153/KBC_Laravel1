@@ -3,9 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "build:ssr": "vite build && vite build --ssr",
-        "dev": "vite",
+        "generate:wayfinder": "php artisan wayfinder:generate",
+        "build": "npm run generate:wayfinder && vite build",
+        "build:ssr": "npm run generate:wayfinder && vite build && vite build --ssr",
+        "dev": "npm run generate:wayfinder && vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix"
