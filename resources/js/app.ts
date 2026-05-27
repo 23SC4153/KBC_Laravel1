@@ -26,3 +26,16 @@ createInertiaApp({
 
 // This will set light / dark mode on page load...
 initializeTheme();
+
+// Expose CSRF token to JS runtime and configure axios if present
+try {
+    const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
+    const token = meta ? meta.getAttribute('content') : null;
+    (window as any).csrfToken = token;
+
+    if (typeof (globalThis as any).axios !== 'undefined' && token) {
+        (globalThis as any).axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+    }
+} catch (e) {
+    // ignore in non-browser contexts (vite SSR, tests)
+}
