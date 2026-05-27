@@ -15,10 +15,10 @@ class AdminSeeder extends Seeder
     {
         // Create admin account
         UserAccount::firstOrCreate(
-            ['username' => 'admin'],
+            ['username' => env('ADMIN_USERNAME', 'admin')],
             [
-                'email' => 'admin@kbc.local',
-                'password' => Hash::make('admin123'),
+                'email' => env('ADMIN_EMAIL', 'admin@kbc.edu.ph'),
+                'password' => Hash::make(env('ADMIN_PASSWORD', 'admin12345')),
                 'role' => 'admin',
                 'is_active' => true,
                 'password_changed' => true,
