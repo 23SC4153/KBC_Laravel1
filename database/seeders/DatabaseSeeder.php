@@ -27,6 +27,17 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create an admin user
+        UserAccount::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'email' => 'admin@example.com',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+                'is_active' => 1,
+            ]
+        );
+
         // Sample domain data: degrees, subjects, teachers, students
         $this->call([
             SampleDataSeeder::class,
