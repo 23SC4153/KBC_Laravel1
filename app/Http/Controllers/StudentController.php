@@ -306,6 +306,10 @@ class StudentController extends Controller
 
         $student->subjects()->syncWithoutDetaching([$request->subject_id]);
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json($this->buildSubjectEnrollmentPayload($student, 'Subject enrolled successfully.'));
+        }
+
         return redirect()->route('Student.show', $student->id)->with('success', 'Subject enrolled successfully.');
     }
 
@@ -317,6 +321,55 @@ class StudentController extends Controller
         $student = StudentModel::findOrFail($id);
         $student->subjects()->detach($subjectId);
 
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json($this->buildSubjectEnrollmentPayload($student, 'Subject removed successfully.'));
+        }
+
         return redirect()->route('Student.show', $student->id)->with('success', 'Subject removed successfully.');
+    }
+
+    /**
+     * Build the AJAX payload for student subject enrollment updates.
+     */
+    private function buildSubjectEnrollmentPayload(StudentModel $student, string $message): array
+    {
+        $enrolledSubjects = $student->subjects()
+            ->orderBy('SubjectCode', 'asc')
+            ->get()
+            ->map(function (Subject $subject) use ($student) {
+                return [
+                    'id' => $subject->id,
+                    'code' => $subject->SubjectCode,
+                    'name' => $subject->SubjectName,
+                    'description' => $subject->Description,
+                    'remove_url' => route('Student.unenrollSubject', [$student->id, $subject->id]),
+                ];
+            })
+            ->values();
+
+        $enrolledIds = $enrolledSubjects->pluck('id')->all();
+
+        $availableSubjects = Subject::query()
+            ->where('degree_id', $student->degree_id)
+            ->whereNotIn('id', $enrolledIds, 'and')
+            ->orderBy('SubjectCode', 'asc')
+            ->get()
+            ->map(function (Subject $subject) {
+                return [
+                    'id' => $subject->id,
+                    'code' => $subject->SubjectCode,
+                    'name' => $subject->SubjectName,
+                    'description' => $subject->Description,
+                ];
+            })
+            ->values();
+
+        return [
+            'message' => $message,
+            'student_id' => $student->id,
+            'enrolled_count' => $enrolledSubjects->count(),
+            'enrolled_subjects' => $enrolledSubjects,
+            'available_subjects' => $availableSubjects,
+        ];
     }
 }

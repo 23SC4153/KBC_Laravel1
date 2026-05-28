@@ -10,6 +10,8 @@
         <h4>Enroll a Student in Subjects</h4>
     </div>
     <div class="card-body">
+        <div id="enrollmentPageAlert" class="mb-3"></div>
+
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Select Student</label>
@@ -25,9 +27,9 @@
         <div class="mb-3">
             <label class="form-label">Subjects</label>
             <div class="d-flex gap-2 mb-2">
-                <button id="selectAllBtn" class="btn btn-sm btn-outline-secondary">Select All</button>
-                <button id="clearAllBtn" class="btn btn-sm btn-outline-secondary">Clear All</button>
-                <button id="saveEnrollmentBtn" class="btn btn-sm btn-primary">Save Enrollment</button>
+                <button id="selectAllBtn" type="button" class="btn btn-sm btn-outline-secondary">Select All</button>
+                <button id="clearAllBtn" type="button" class="btn btn-sm btn-outline-secondary">Clear All</button>
+                <button id="saveEnrollmentBtn" type="button" class="btn btn-sm btn-primary">Save Enrollment</button>
             </div>
             <div class="row" id="subjectsGrid">
                 @foreach($subjects as $subject)
@@ -73,6 +75,28 @@
         const sid = document.getElementById('studentSelect').value;
         if (!sid) { alert('Select a student first.'); return; }
         const selected = Array.from(document.querySelectorAll('.subject-checkbox:checked')).map(cb => cb.value);
+        const alertBox = document.getElementById('enrollmentPageAlert');
+
+        const escapeHtml = (value) => String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        const setAlert = (type, message) => {
+            if (!alertBox) {
+                alert(message);
+                return;
+            }
+
+            alertBox.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${escapeHtml(message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        };
 
         fetch('{{ route('Enrollment.enroll') }}', {
             method: 'POST',
@@ -82,13 +106,21 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify({ student_id: sid, subjects: selected })
-        }).then(r => r.json()).then(data => {
-            alert(data.message || 'Enrollment updated');
-            // update local mapping
-            studentSubjects[sid] = selected.map(x => parseInt(x));
-        }).catch(e => {
-            alert('Unable to save enrollment.');
-            console.error(e);
+        }).then(async (response) => {
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const messages = data.errors ? Object.values(data.errors).flat() : [];
+                throw new Error(messages[0] || data.message || 'Unable to save enrollment.');
+            }
+
+            return data;
+        }).then((data) => {
+            setAlert('success', data.message || 'Enrollment updated');
+            studentSubjects[sid] = selected.map((x) => parseInt(x, 10));
+        }).catch((error) => {
+            setAlert('danger', error.message || 'Unable to save enrollment.');
+            console.error(error);
         });
     });
 </script>

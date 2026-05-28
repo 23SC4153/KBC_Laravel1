@@ -51,11 +51,13 @@
         <hr class="mt-4">
         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
             <h6 class="mb-0">Subject Enrollments</h6>
-            <span class="badge bg-secondary">{{ $student->subjects->count() }} enrolled</span>
+            <span class="badge bg-secondary" id="enrolledCountBadge">{{ $student->subjects->count() }} enrolled</span>
         </div>
 
+        <div id="enrollmentStatusAlert" class="mb-3"></div>
+
         @if($student->subjects->count())
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-3" id="enrolledSubjectsGrid">
                 @foreach($student->subjects as $subject)
                     <div class="col-md-6">
                         <div class="border rounded-3 p-3 h-100" style="background: rgba(13,110,253,0.03); border-color: rgba(13,110,253,0.14) !important;">
@@ -64,7 +66,7 @@
                                     <div class="fw-semibold">{{ $subject->SubjectCode }}</div>
                                     <div class="small text-muted">{{ $subject->SubjectName }}</div>
                                 </div>
-                                <form action="{{ route('Student.unenrollSubject', [$student->id, $subject->id]) }}" method="POST" onsubmit="return confirm('Remove this subject from the student?')">
+                                <form action="{{ route('Student.unenrollSubject', [$student->id, $subject->id]) }}" method="POST" class="js-unenroll-subject-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
@@ -81,11 +83,11 @@
 
         @if($availableSubjects->count())
             <div class="border rounded-3 p-3" style="background: rgba(40,167,69,0.03); border-color: rgba(40,167,69,0.16) !important;">
-                <form action="{{ route('Student.enrollSubject', $student->id) }}" method="POST" class="row g-3 align-items-end">
+                <form action="{{ route('Student.enrollSubject', $student->id) }}" method="POST" class="row g-3 align-items-end" id="singleEnrollForm">
                     @csrf
                     <div class="col-md-8">
                         <label for="subject_id_modal" class="form-label mb-1">Enroll in another subject</label>
-                        <select name="subject_id" id="subject_id_modal" class="form-select" required>
+                        <select name="subject_id" id="singleEnrollSubjectSelect" class="form-select" required>
                             <option value="">Choose a subject</option>
                             @foreach($availableSubjects as $subject)
                                 <option value="{{ $subject->id }}">{{ $subject->SubjectCode }} - {{ $subject->SubjectName }}</option>
@@ -145,3 +147,31 @@
         </div>
     @endif
 </div>
+
+@php
+    $studentEnrollmentState = [
+        'studentId' => $student->id,
+        'enrolledSubjects' => $student->subjects->map(function ($subject) use ($student) {
+            return [
+                'id' => $subject->id,
+                'code' => $subject->SubjectCode,
+                'name' => $subject->SubjectName,
+                'description' => $subject->Description,
+                'remove_url' => route('Student.unenrollSubject', [$student->id, $subject->id]),
+            ];
+        })->values(),
+        'availableSubjects' => $availableSubjects->map(function ($subject) {
+            return [
+                'id' => $subject->id,
+                'code' => $subject->SubjectCode,
+                'name' => $subject->SubjectName,
+                'description' => $subject->Description,
+            ];
+        })->values(),
+    ];
+@endphp
+
+<script>
+    window.studentEnrollmentState = @json($studentEnrollmentState);
+</script>
+@include('Student.Student.partials.enrollment-ajax')
