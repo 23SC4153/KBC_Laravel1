@@ -128,6 +128,11 @@ class AjaxModal {
             this.loadContent(url, title);
         });
 
+        $(document).on('click', '[data-ajax-submit]', (e) => {
+            e.preventDefault();
+            $(e.currentTarget).closest('form').trigger('submit');
+        });
+
         $(document).on('click', '#ajaxModalSubmit', (e) => {
             e.preventDefault();
             const form = $(`#${this.modalId} ${this.containerSelector} form`);

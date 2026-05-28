@@ -87,7 +87,7 @@
     </div>
 
     <div class="d-flex gap-2 justify-content-end">
-        <button type="submit" class="btn btn-primary">{{ isset($student) ? 'Update Student' : 'Add Student' }}</button>
+        <button type="submit" class="btn btn-primary" data-ajax-submit>{{ isset($student) ? 'Update Student' : 'Add Student' }}</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
     </div>
 </form>

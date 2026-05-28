@@ -56,7 +56,7 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-success">Add Teacher</button>
+                <button type="submit" class="btn btn-success" data-ajax-submit>Add Teacher</button>
                 <a href="{{ route('Teacher.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>

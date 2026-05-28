@@ -82,7 +82,7 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-success">Add Student</button>
+                <button type="submit" class="btn btn-success" data-ajax-submit>Add Student</button>
                 <a href="{{ route('Student.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
