@@ -21,8 +21,19 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Seed the database
-        if (!app()->runningInConsole()) {
+        // Keep this for Railway deployment to ensure admin exists
+        if (!app()->runningInConsole() && Schema::hasTable('user_accounts')) {
+            \App\Models\UserAccount::firstOrCreate(
+                ['username' => 'admin'],
+                [
+                    'email' => 'admin@example.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                    'role' => 'admin',
+                    'is_active' => 1,
+                    'password_changed' => 1,
+                ]
+            );
+            
             \Illuminate\Support\Facades\Artisan::call('db:seed');
         }
     }
