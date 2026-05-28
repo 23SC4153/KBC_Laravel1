@@ -22,18 +22,23 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Ensure Railway has an admin account, without running full seeders on every request.
+        // Ensure an admin account exists in Railway without running the full seeder on every request.
         if (!app()->runningInConsole() && Schema::hasTable('user_accounts')) {
-            UserAccount::firstOrCreate(
-                ['username' => 'admin'],
-                [
+            $adminExists = UserAccount::query()
+                ->where('username', 'admin')
+                ->orWhere('email', 'admin@example.com')
+                ->exists();
+
+            if (!$adminExists) {
+                UserAccount::create([
+                    'username' => 'admin',
                     'email' => 'admin@example.com',
                     'password' => Hash::make('admin123'),
                     'role' => 'admin',
                     'is_active' => 1,
                     'password_changed' => 1,
-                ]
-            );
+                ]);
+            }
         }
     }
 

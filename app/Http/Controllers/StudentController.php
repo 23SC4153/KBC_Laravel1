@@ -22,7 +22,7 @@ class StudentController extends Controller
     {
         $student = StudentModel::with(['degree', 'subjects'])->findOrFail($id);
         // Show all subjects so student can enroll in any available subject
-        $subjects = Subject::orderBy('SubjectCode')->get();
+        $subjects = Subject::orderBy('SubjectCode', 'asc')->get();
         return view('Student.Student.enrollsubjects', compact('student', 'subjects'));
     }
 

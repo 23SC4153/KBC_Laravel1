@@ -63,8 +63,8 @@ class StudentModel extends Model
                 $user = $student->userAccount;
                 $userId = $user->id;
 
-                $hasOtherStudents = static::where('user_account_id', $userId)->where('id', '!=', $student->id)->exists();
-                $hasTeachers = \App\Models\TeacherModel::where('user_account_id', $userId)->exists();
+                $hasOtherStudents = static::query()->where('user_account_id', $userId)->where('id', '!=', $student->id)->exists();
+                $hasTeachers = \App\Models\TeacherModel::query()->where('user_account_id', $userId)->exists();
 
                 if (! $hasOtherStudents && ! $hasTeachers && $user->role !== 'admin') {
                     $user->delete();
