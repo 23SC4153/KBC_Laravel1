@@ -36,6 +36,10 @@ return new class extends Migration
                 $table->string('name')->nullable()->after('id');
             }
 
+            if (!Schema::hasColumn('users', 'email')) {
+                $table->string('email')->unique()->after('name');
+            }
+
             if (!Schema::hasColumn('users', 'password')) {
                 $table->string('password')->nullable()->after('email');
             }
