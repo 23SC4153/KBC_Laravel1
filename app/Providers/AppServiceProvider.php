@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\UserAccount;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
@@ -21,20 +22,18 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Keep this for Railway deployment to ensure admin exists
+        // Ensure Railway has an admin account, without running full seeders on every request.
         if (!app()->runningInConsole() && Schema::hasTable('user_accounts')) {
-            \App\Models\UserAccount::firstOrCreate(
+            UserAccount::firstOrCreate(
                 ['username' => 'admin'],
                 [
                     'email' => 'admin@example.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                    'password' => Hash::make('admin123'),
                     'role' => 'admin',
                     'is_active' => 1,
                     'password_changed' => 1,
                 ]
             );
-            
-            \Illuminate\Support\Facades\Artisan::call('db:seed');
         }
     }
 
